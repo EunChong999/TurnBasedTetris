@@ -72,6 +72,7 @@ void Player2();
 
 int confirm;
 int confirm_1;
+int curTurnOrder = 0;
 
 int main() {
 
@@ -82,23 +83,8 @@ int main() {
 	form_kind = rand() % 7;
 	form_kind_1 = rand() % 7;
 
-	Player1();
-
 	while (1)
 	{
-		CurrentXY(20, 8); SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 12); printf("점수 : %d", score);
-		CurrentXY(96, 8); SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 9); printf("점수 : %d", score_1);
-
-		if (confirm == TRUE)
-		{
-			Player2();
-		}
-
-		if (confirm_1 == TRUE)
-		{
-			Player1();
-		}
-
 		if (stopgame == 1)
 		{
 			if (score == 3)
@@ -117,7 +103,7 @@ int main() {
 				color = 12; // RED
 				Ending_scene();
 			}
-			else if(score < score_1)
+			else if (score < score_1)
 			{
 				color = 9; // BLUE
 				Ending_scene();
@@ -130,6 +116,31 @@ int main() {
 			}
 
 			break;
+		}
+		else
+		{
+			CurrentXY(20, 8); SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 12); printf("점수 : %d", score);
+			CurrentXY(96, 8); SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 9); printf("점수 : %d", score_1);
+
+			if (curTurnOrder == 0)
+			{
+				CurrentXY(55, 8); SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 12); printf("현재 턴 : 레드");
+			}
+			else
+			{
+				CurrentXY(55, 8); SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 9); printf("현재 턴 : 블루");
+			}
+
+			if (curTurnOrder == 0)
+			{
+				Player1();
+				CurrentXY(20, 8); SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 12); printf("점수 : %d", score);
+			}
+			else 
+			{
+				Player2();
+				CurrentXY(96, 8); SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 9); printf("점수 : %d", score_1);
+			}
 		}
 	}
 	
@@ -144,7 +155,7 @@ void Ending_scene()
 
 	if (score == score_1)
 	{
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color); printf("DRAW");
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color); printf("■ DRAW");
 	}
 	else
 	{
@@ -152,13 +163,10 @@ void Ending_scene()
 	}
 };
 
-void Player1()
+void Player1() 
 {
 	int chk, chk2;
-	while (1)
-	{
-
-
+	while (1) {
 		screen_y = 0;
 		screen_x = 4;
 
@@ -178,32 +186,31 @@ void Player1()
 			Check_line();
 			stopgame = 1;
 			system("cls");
+			break;
 		}
-		else if (chk == TRUE && chk2 == TRUE)
-		{
+		else if (chk == TRUE && chk2 == TRUE) {
 			stopgame = 1;
 			system("cls");
+			break;
 		}
 
 		do {
 			Timing();
 		} while (Select());
 
-		if (confirm == TRUE)
-		{
+		if (confirm == TRUE) {
+			curTurnOrder = 1;
 			break;
 		}
 	}
-
 }
+
 
 void Player2()
 {
 	int chk_1, chk2_1;
 	while (1)
 	{
-
-
 		screen_y_1 = 0;
 		screen_x_1 = 4;
 
@@ -223,11 +230,13 @@ void Player2()
 			Check_line_1();
 			stopgame = 1;
 			system("cls");
+			break;
 		}
 		else if (chk_1 == TRUE && chk2_1 == TRUE)
 		{
 			stopgame = 1;
 			system("cls");
+			break;
 		}
 
 		do {
@@ -236,6 +245,7 @@ void Player2()
 
 		if (confirm_1 == TRUE)
 		{
+			curTurnOrder = 0;
 			break;
 		}
 	}
@@ -296,7 +306,7 @@ void Hide_form() {
 void Show_form_1() {
 	for (int i = 0; i < 4; i++) {
 
-		CurrentXY(97 + (form[next_form_kind_1][0][i * 2]) * 2,
+		CurrentXY(96 + (form[next_form_kind_1][0][i * 2]) * 2,
 			2 + form[next_form_kind_1][0][i * 2 + 1]);
 
 		tetris[10 + form[next_form_kind_1][0][i * 2 + 1]]
@@ -310,7 +320,7 @@ void Show_form_1() {
 void Hide_form_1() {
 	for (int i = 0; i < 4; i++) {
 
-		CurrentXY(97 + (form[next_form_kind_1][0][i * 2]) * 2,
+		CurrentXY(96 + (form[next_form_kind_1][0][i * 2]) * 2,
 			2 + form[next_form_kind_1][0][i * 2 + 1]);
 
 		tetris[10 + form[next_form_kind_1][0][i * 2 + 1]]
@@ -417,11 +427,6 @@ void Move_data(int row) {
 		for (int j = 1; j < 11; j++)
 			tetris[i + 1][j] = tetris[i][j];
 
-	if (score == 10)
-	{
-		stopgame = 1;
-	}
-
 	score++;
 }
 
@@ -486,7 +491,7 @@ int Select(void) {
 	int rtn_value;
 
 	//A
-	if (GetAsyncKeyState(0x41)) {
+	if (GetAsyncKeyState(0x41) & 0x8000) {
 
 		chk1 = Check_board(screen_x - 1, screen_y);
 
@@ -499,7 +504,7 @@ int Select(void) {
 	}
 
 	//D
-	if (GetAsyncKeyState(0x44)) {
+	if (GetAsyncKeyState(0x44) & 0x8000) {
 		chk1 = Check_board(screen_x + 1, screen_y);
 
 		if (chk1 == FALSE) {
@@ -511,7 +516,7 @@ int Select(void) {
 	}
 
 	//W
-	if (GetAsyncKeyState(0x57)) {
+	if (GetAsyncKeyState(0x57) & 0x8000) {
 		prev_rotate = rotate_kind;
 
 		if (rotate_kind == 3) rotate_kind = 0;
@@ -535,7 +540,7 @@ int Select(void) {
 	}
 
 	//S
-	if (GetAsyncKeyState(0x53)) {
+	if (GetAsyncKeyState(0x53) & 0x8000) {
 		while (!Go_down());
 		return FALSE;
 	}
@@ -544,7 +549,6 @@ int Select(void) {
 
 	if (rtn_value == TRUE) return FALSE;
 	else return TRUE;
-
 }
 
 void Timing(void) {
@@ -660,11 +664,6 @@ void Move_data_1(int row) {
 		for (int j = 1; j < 11; j++)
 			tetris_1[i + 1][j] = tetris_1[i][j];
 
-	if (score_1 == 10)
-	{
-		stopgame = 1;
-	}
-
 	score_1++;
 }
 
@@ -725,8 +724,7 @@ int Select_1(void) {
 	int new_rotate;
 	int rtn_value;
 
-
-	if (GetAsyncKeyState(VK_LEFT)) {
+	if (GetAsyncKeyState(VK_LEFT) & 0x8000) {
 
 		chk1 = Check_board_1(screen_x_1 - 1, screen_y_1);
 
@@ -738,7 +736,7 @@ int Select_1(void) {
 		}
 	}
 
-	if (GetAsyncKeyState(VK_RIGHT)) {
+	if (GetAsyncKeyState(VK_RIGHT) & 0x8000) {
 		chk1 = Check_board_1(screen_x_1 + 1, screen_y_1);
 
 		if (chk1 == FALSE) {
@@ -749,7 +747,7 @@ int Select_1(void) {
 		}
 	}
 
-	if (GetAsyncKeyState(VK_UP)) {
+	if (GetAsyncKeyState(VK_UP) & 0x8000) {
 		prev_rotate = rotate_kind_1;
 
 		if (rotate_kind_1 == 3) rotate_kind_1 = 0;
@@ -772,7 +770,7 @@ int Select_1(void) {
 		}
 	}
 
-	if (GetAsyncKeyState(VK_DOWN)) {
+	if (GetAsyncKeyState(VK_DOWN) & 0x8000) {
 		while (!Go_down_1());
 		return FALSE;
 	}
@@ -781,7 +779,6 @@ int Select_1(void) {
 
 	if (rtn_value == TRUE) return FALSE;
 	else return TRUE;
-
 }
 
 void Timing_1(void) {
